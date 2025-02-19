@@ -16,11 +16,10 @@ const selectDefault: {
     label: string;
 }[] = [];
 
-    const SaveEmpleadosModal = (props: any) => {
-        const { addEmployeeModal, setAddEmployeeModal, setSaveParams, saveParams, fentchEmployee, employeeDefault, isEdit, setIsEdit } = props;
+    const SaveVehiculosModal = (props: any) => {
+        const { addEmployeeModal, setAddEmployeeModal, setSaveParams, saveParams, fentchVehicles, employeeDefault } = props;
         const [errors, setErrors] = useState<String[]>([]);
-        const errorsTags = ['nombre', 'cedula', 'tandaLabor', 'porcientoComision','fechaIngreso',!isEdit && 'rol_Id'];
-        const listTanda = ['Matutina', 'Vespertina', 'Nocturna'];
+        const errorsTags = ['descripcion', 'NoChasis', 'NoMotor', 'NoPlaca','tipoVehiculo_Id', 'marca_Id', 'modelo_Id', 'tipoCombustible_Id'];
         const [loading, setLoading] = useState(false);
         const [displayedUsers, setdisplayedUsers] = useState(JSON.parse(JSON.stringify(selectDefault)));
         //const [allUser, setAllUser] = useState<any>([]);
@@ -40,7 +39,7 @@ const selectDefault: {
                 return item.name.toString().toLowerCase().includes(inputValue.toLowerCase());
             });
         } else {
-            const response = await apiGet({ path: 'empleados/users' });
+            const response = await apiGet({ path: 'vehiculos/users' });
             result = response.info;
             allUser.current = result;
         }
@@ -92,26 +91,26 @@ const selectDefault: {
                 if (saveParams.id) {
                     // Update task
                     const id = saveParams.id;
-                    const resp = await apiPatch({ path: 'empleados', data: saveParams, id });
+                    const resp = await apiPatch({ path: 'vehiculos', data: saveParams, id });
                     if (resp?.info?.[0]?.msg !== 'ok') {
                         setLoading(false);
                         // Added optional chaining
                         showMessage({msg:'Error saving ticket', type:'error'});
                     } else {
-                        fentchEmployee();
+                        fentchVehicles();
                         close();
                     }
 
                 } else {
                     // Insert task
-                    const resp = await apiPost({ path: 'empleados', data: saveParams });
+                    const resp = await apiPost({ path: 'vehiculos', data: saveParams });
                     const id = resp?.info?.[0]?.id ?? null; // Added optional chaining and nullish coalescing
 
                 if (id === null) {
                     setLoading(false);
                     showMessage({msg:'Error saving the Item', type:'error'});
                 } else {
-                    fentchEmployee();
+                    fentchVehicles();
                     showMessage({msg:'The Item has been saved successfully.'});
                     close();
                 }
@@ -132,8 +131,6 @@ const selectDefault: {
         };
 
         const close = () => {
-            setErrors([]);
-            setIsEdit(false);
             setAddEmployeeModal(false);
             setSaveParams(employeeDefault);
         }
@@ -175,7 +172,7 @@ const selectDefault: {
                             >
                                 <div className="flex items-center justify-between bg-[#fbfbfb] px-5 py-3 dark:bg-[#121c2c]">
                                     <div className="bg-[#fbfbfb] py-3 text-lg font-medium ltr:pl-5 ltr:pr-[50px] rtl:pl-[50px] rtl:pr-5 dark:bg-[#121c2c]">
-                                        {saveParams?.id ? 'Editar empleados' : 'Añadir empleados'}
+                                        {saveParams?.id ? 'Editar vehiculos' : 'Añadir vehiculos'}
                                     </div>
                                     <button
                                         type="button"
@@ -208,35 +205,36 @@ const selectDefault: {
                                         <div
                                         //className={`${auth.permissions.includes('sys-adm') || auth.permissions.includes('it-access') ? 'lg:m-3 lg:w-[36%]' : ''} min-w-[250px]`}
                                         >
-                                            <div className={`mb-5 ${errors.includes('nombre') ? 'has-error' : ''}`}>
-                                                <label htmlFor="nombre" className="form-label flex">
-                                                    nombre
+                                            <div className={`mb-5 ${errors.includes('descripcion') ? 'has-error' : ''}`}>
+                                                <label htmlFor="descripcion" className="form-label flex">
+                                                    descripcion
                                                 </label>
                                                 <input
-                                                    id="nombre"
+                                                    id="descripcion"
                                                     type="text"
-                                                    placeholder="Enter nombre del empleado"
+                                                    placeholder="Enter descripcion del vehiculo"
                                                     className="form-input"
-                                                    value={saveParams.nombre}
+                                                    value={saveParams.descripcion}
                                                     onChange={(e) => changeValue(e)}
                                                 />
                                             </div>
-                                            <div className={`mb-5 ${errors.includes('cedula') ? 'has-error' : ''}`}>
-                                                <label htmlFor="cedula" className="form-label flex">
-                                                    Cedula
+                                            <div className={`mb-5 ${errors.includes('nochasis') ? 'has-error' : ''}`}>
+                                                <label htmlFor="nochasis" className="form-label flex">
+                                                    NoChasis
                                                 </label>
                                                 <InputMask
-                                                    id="cedula"
+                                                    id="nochasis"
                                                     type="text"
-                                                    placeholder="000-0000000-0"
+                                                    placeholder="*****************"
                                                     className="form-input"
-                                                    mask="999-9999999-9"
-                                                    value={saveParams.cedula}
-                                                    onBlur={handleBlur}
+                                                    mask="*****************"
+                                                    maskChar=""
+                                                    alwaysShowMask={false}
+                                                    value={saveParams.nochasis}
                                                     onChange={(e: any) => changeValue(e)}
                                                 />
                                             </div>
-                                            <div className="mb-5 flex w-full flex-row gap-4">
+                                            {/* <div className="mb-5 flex w-full flex-row gap-4">
                                                 <div className={`flex-1 ${errors.includes('tandaLabor') ? 'has-error' : ''}`}>
                                                     <label htmlFor="tandaLabor" className="form-label flex">
                                                         Tanda
@@ -284,7 +282,7 @@ const selectDefault: {
                                                           }}
                                                     />
                                                 </div>
-                                            </div>
+                                            </div> */}
 
                                             <div className={`mb-5 ${errors.includes('fechaIngreso') ? 'has-error' : ''}`}>
                                                 <label htmlFor="fechaIngreso">Fecha de Ingreso</label>
@@ -297,7 +295,7 @@ const selectDefault: {
                                                     onChange={(e) => changeValue(e)}
                                                 />
                                             </div>
-                                            <div className={`custom-select css-b62m3t-container mb-5 ${errors.includes('user_Id') ? 'has-error' : ''}`}>
+                                            <div className="custom-select css-b62m3t-container mb-5">
                                                     <label htmlFor="selectTicketType" className="flex">
                                                         Users 
                                                     </label>
@@ -360,4 +358,4 @@ const selectDefault: {
         </Transition>
     );
 };
-export default SaveEmpleadosModal;
+export default SaveVehiculosModal;

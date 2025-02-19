@@ -8,7 +8,7 @@ import { split } from 'lodash';
 import InputMask from 'react-input-mask';
 import {showMessage} from '@/utils/notifications'
 import { validaCedula } from '@/utils/utilities';
-import { apiGet, apiPost, apiPatch } from '@/lib/api/admin';
+import { apiGet, apiPost, apiPatch } from '@/lib/api/main';
 
 
 const selectDefault: {
@@ -16,11 +16,11 @@ const selectDefault: {
     label: string;
 }[] = [];
 
-    const SaveEmpleadosModal = (props: any) => {
-        const { addEmployeeModal, setAddEmployeeModal, setSaveParams, saveParams, fentchEmployee, employeeDefault, isEdit, setIsEdit } = props;
+    const SaveTiposVehiculosModal = (props: any) => {
+        const { addTypesVehiclesModal, setAddTypesVehiclesModal, setSaveParams, saveParams, fentchTypesVehicles, typesvehiclesDefault } = props;
         const [errors, setErrors] = useState<String[]>([]);
-        const errorsTags = ['nombre', 'cedula', 'tandaLabor', 'porcientoComision','fechaIngreso',!isEdit && 'rol_Id'];
-        const listTanda = ['Matutina', 'Vespertina', 'Nocturna'];
+        const errorsTags = ['nombre', 'cedula', 'NoTarjetaCR', 'limiteCredito','tipoPersona'];
+        const listPersona = ['Física', 'Jurídica'];
         const [loading, setLoading] = useState(false);
         const [displayedUsers, setdisplayedUsers] = useState(JSON.parse(JSON.stringify(selectDefault)));
         //const [allUser, setAllUser] = useState<any>([]);
@@ -40,7 +40,7 @@ const selectDefault: {
                 return item.name.toString().toLowerCase().includes(inputValue.toLowerCase());
             });
         } else {
-            const response = await apiGet({ path: 'empleados/users' });
+            const response = await apiGet({ path: 'tiposvehiculos/users' });
             result = response.info;
             allUser.current = result;
         }
@@ -81,8 +81,9 @@ const selectDefault: {
             });
         };
 
-        const saveEmployee = async () => {
+        const saveTypesVehicles = async () => {
            try {
+            saveParams.estado_Id=1;
                 setLoading(true);
                 const errorsCount = checkErrors();
                 if (errorsCount > 0) {
@@ -92,31 +93,35 @@ const selectDefault: {
                 if (saveParams.id) {
                     // Update task
                     const id = saveParams.id;
-                    const resp = await apiPatch({ path: 'empleados', data: saveParams, id });
+                    const resp = await apiPatch({ path: 'tiposvehiculos', data: saveParams, id });
                     if (resp?.info?.[0]?.msg !== 'ok') {
                         setLoading(false);
                         // Added optional chaining
-                        showMessage({msg:'Error saving ticket', type:'error'});
+                        showMessage({msg:'Error saving item', type:'error'});
                     } else {
-                        fentchEmployee();
+                        fentchTypesVehicles();
+                        showMessage({msg:'Item saved successfully', type: 'success'});
                         close();
                     }
 
                 } else {
                     // Insert task
-                    const resp = await apiPost({ path: 'empleados', data: saveParams });
+                    const resp = await apiPost({ path: 'tiposvehiculos', data: saveParams });
                     const id = resp?.info?.[0]?.id ?? null; // Added optional chaining and nullish coalescing
-
+                    const msg = resp?.info?.[0]?.msg ?? null;
+                    console.log(id, 'id');
                 if (id === null) {
                     setLoading(false);
-                    showMessage({msg:'Error saving the Item', type:'error'});
+                   
+                    showMessage({msg: msg ? msg : 'Error saving item' , type:'error'});
                 } else {
-                    fentchEmployee();
-                    showMessage({msg:'The Item has been saved successfully.'});
+                    fentchTypesVehicles();
+                    showMessage({msg:'Item saved successfully', type: 'success'});
                     close();
                 }
                 }
-               
+                
+     
                 
                 // refreshTasks();
             } catch (error) {
@@ -130,25 +135,21 @@ const selectDefault: {
         const onChangeValue = (newValue: any) => {
             setSaveParams({ ...saveParams, user_Id: newValue.value });
         };
-
+    
         const close = () => {
             setErrors([]);
-            setIsEdit(false);
-            setAddEmployeeModal(false);
-            setSaveParams(employeeDefault);
+            setAddTypesVehiclesModal(false);
+            setSaveParams(typesvehiclesDefault);
         }
-
-    
 
 
     return (
-        <Transition appear show={addEmployeeModal} as={Fragment}>
+        <Transition appear show={addTypesVehiclesModal} as={Fragment}>
             <Dialog
                 as="div"
-                open={addEmployeeModal}
+                open={addTypesVehiclesModal}
                 onClose={() => {
                     close();
-                    //     setRemote(false);
                 }}
                 className="relative z-50"
             >
@@ -175,7 +176,7 @@ const selectDefault: {
                             >
                                 <div className="flex items-center justify-between bg-[#fbfbfb] px-5 py-3 dark:bg-[#121c2c]">
                                     <div className="bg-[#fbfbfb] py-3 text-lg font-medium ltr:pl-5 ltr:pr-[50px] rtl:pl-[50px] rtl:pr-5 dark:bg-[#121c2c]">
-                                        {saveParams?.id ? 'Editar empleados' : 'Añadir empleados'}
+                                        {saveParams?.id ? 'Editar Tipos de Vehiculos' : 'Añadir Tipos de Vehiculos'}
                                     </div>
                                     <button
                                         type="button"
@@ -215,7 +216,7 @@ const selectDefault: {
                                                 <input
                                                     id="nombre"
                                                     type="text"
-                                                    placeholder="Enter nombre del empleado"
+                                                    placeholder="Enter nombre del cliente"
                                                     className="form-input"
                                                     value={saveParams.nombre}
                                                     onChange={(e) => changeValue(e)}
@@ -236,42 +237,43 @@ const selectDefault: {
                                                     onChange={(e: any) => changeValue(e)}
                                                 />
                                             </div>
-                                            <div className="mb-5 flex w-full flex-row gap-4">
-                                                <div className={`flex-1 ${errors.includes('tandaLabor') ? 'has-error' : ''}`}>
-                                                    <label htmlFor="tandaLabor" className="form-label flex">
-                                                        Tanda
-                                                    </label>
-                                                    <select id="tandaLabor" className="form-select w-full" value={saveParams.tandaLabor || ''} onChange={changeValue}>
-                                                        <option value="">Seleccione la tanda</option>
-                                                        {listTanda.map((tanda: any, i: number) => (
-                                                            <option key={i} value={tanda}>
-                                                                {tanda}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
+                                            <div className={`mb-5 ${errors.includes('NoTarjetaCR') ? 'has-error' : ''}`}>
+                                                <label htmlFor="NoTarjetaCR" className="form-label flex">
+                                                    No. tarjeta de credito 
+                                                </label>
+                                                <InputMask
+                                                    id="NoTarjetaCR"
+                                                    type="text"
+                                                    placeholder="0000-0000-0000-0000"
+                                                    className="form-input"
+                                                    mask="9999-9999-9999-9999"
+                                                    value={saveParams.NoTarjetaCR}
+                                                    onBlur={handleBlur}
+                                                    onChange={(e: any) => changeValue(e)}
+                                                />
+                                            </div>
 
-                                                <div className={`flex-1 ${errors.includes('porcientoComision') ? 'has-error' : ''}`}>
-                                                    <label htmlFor="porcientoComision" className="form-label flex">
+                                            <div className="mb-5 flex w-full flex-row gap-4">
+                                            <div className={`flex-1 ${errors.includes('limiteCredito') ? 'has-error' : ''}`}>
+                                                    <label htmlFor="limiteCredito" className="form-label flex">
                                                         Porcentaje de Comisión
                                                     </label>
                                                     <input
-                                                        id="porcientoComision"
+                                                        id="limiteCredito"
                                                         type="number"
                                                         placeholder="Ingrese el porcentaje"
                                                         className="form-input w-full"
-                                                        value={saveParams.porcientoComision || ''}
+                                                        value={saveParams.limiteCredito || ''}
                                                         onBlur={handleBlur}
                                                         onChange={(e: any) => changeValue(e)}
                                                         min="0"
-                                                        max="100.00"
+                                                        max="10000000000000.00"
                                                         step="0.01"
                                                         onInput={(e: any) => {
-                                                            // Asegurarse de que el valor no sea menor que 0.01 ni mayor que 100
-                                                            if (e.target.value < 0.01) {
-                                                              e.target.value = 0.01;
-                                                            } else if (e.target.value > 100) {
-                                                              e.target.value = 100;
+                                                            if (e.target.value < 1) {
+                                                              e.target.value = 1;
+                                                            } else if (e.target.value > 10000000000000) {
+                                                              e.target.value = 10000000000000;
                                                             }
                                                         
                                                             // Limitar a 2 decimales
@@ -284,33 +286,19 @@ const selectDefault: {
                                                           }}
                                                     />
                                                 </div>
-                                            </div>
-
-                                            <div className={`mb-5 ${errors.includes('fechaIngreso') ? 'has-error' : ''}`}>
-                                                <label htmlFor="fechaIngreso">Fecha de Ingreso</label>
-                                                <input
-                                                    id="fechaIngreso"
-                                                    type="date"
-                                                    name="fechaIngreso"
-                                                    className={`form-input w-full rounded border p-2`}
-                                                    value={split(saveParams.fechaIngreso, 'T')[0]}
-                                                    onChange={(e) => changeValue(e)}
-                                                />
-                                            </div>
-                                            <div className={`custom-select css-b62m3t-container mb-5 ${errors.includes('user_Id') ? 'has-error' : ''}`}>
-                                                    <label htmlFor="selectTicketType" className="flex">
-                                                        Users 
+                                                <div className={`flex-1 ${errors.includes('tipoPersona') ? 'has-error' : ''}`}>
+                                                    <label htmlFor="tipoPersona" className="form-label flex">
+                                                        Tanda
                                                     </label>
-                                                    <AsyncSelect //Category
-                                                        cacheOptions
-                                                        defaultOptions
-                                                        value={displayedUsers.filter((i: any) => i.value == saveParams.user_Id)[0]}
-                                                        loadOptions={promiseOptionsUser}
-                                                        onChange={(newValue: any) => onChangeValue(newValue)}
-                                                        menuPlacement="auto"
-                                                        maxMenuHeight={120}
-                                                        placeholder="Selecciona un user"
-                                                    />
+                                                    <select id="tipoPersona" className="form-select w-full" value={saveParams.tipoPersona || ''} onChange={changeValue}>
+                                                        <option value="">Seleccione la tanda</option>
+                                                        {listPersona.map((tanda: any, i: number) => (
+                                                            <option key={i} value={tanda}>
+                                                                {tanda}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -333,7 +321,7 @@ const selectDefault: {
                                                 <button
                                                     type="button"
                                                     className={`btn btn-success gap-2 ltr:ml-4 rtl:mr-4 ${loading ? 'cursor-not-allowed opacity-50' : ''}`}
-                                                    onClick={() => saveEmployee()}
+                                                    onClick={() => saveTypesVehicles()}
                                                     disabled={loading}
                                                 >
                                                     {loading ? (
@@ -360,4 +348,4 @@ const selectDefault: {
         </Transition>
     );
 };
-export default SaveEmpleadosModal;
+export default SaveTiposVehiculosModal;

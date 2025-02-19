@@ -11,6 +11,13 @@ export const returnUnauthorized = () => {
     };
 };
 
+export function permissionRequired(requiredPermissions, userPermissions) {
+    //if any of the required permissions is in the user permissions OR userPermissions has 'sys-adm', return true
+    return requiredPermissions.some((permission) => userPermissions.includes(permission))
+        || userPermissions.includes('sys-adm');
+}
+
+
 export function getUserFromStorage() {
     const storedUserData = JSON.parse(localStorage.getItem('userData') ?? '{}');
     const { id, user, permissions,} = storedUserData;

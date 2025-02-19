@@ -9,33 +9,28 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import {showMessage, showConfirm} from '@/utils/notifications';
 import {formatDateTime} from '@/utils/utilities';
 import { apiGet, apiDelete } from '@/lib/api/admin';
-import SaveEmpleadosModal from '@/components/pages/empleados/saveEmpleadosModal';
+import SaveTiposCombustibleModal from '@/components/pages/tiposCombustible/saveTiposCombustibleModal';
 
-const PATH = 'empleados';
+const PATH = 'tiposcombustible';
 
-const employeeDefault = {
+const typesfuelDefault = {
     id: null,
-    nombre: '',
-    cedula: '',
-    tandaLabor: '',
-    porcientoComision: null,
-    fechaIngreso: null,
+    descripcion: '',
     estado_Id: 1,
-    user_Id: null,
     
 };
 
-const Empleados = () => {
+const TiposCombustible = () => {
 
 
     useEffect(() => {
-        fentchEmployee();
+        fentchTypesFuel();
         //-setProjects(projects.info);
     },[]);
 
 
-       const fentchEmployee = async ()  =>{
-        const emp = await apiGet({ path: 'empleados' });
+       const fentchTypesFuel = async ()  =>{
+        const emp = await apiGet({ path: 'tiposcombustible' });
         setInitialRecords(sortBy(emp?.info, 'id'))
 
        }
@@ -47,12 +42,11 @@ const Empleados = () => {
     
         const [page, setPage] = useState(1);
         const PAGE_SIZES = [10, 20, 30, 50, 100];
-        const [saveParams, setSaveParams] = useState<any>(JSON.parse(JSON.stringify(employeeDefault)));
+        const [saveParams, setSaveParams] = useState<any>(JSON.parse(JSON.stringify(typesfuelDefault)));
         const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
         const [initialRecords, setInitialRecords] = useState<any>([]);
-        const [isEdit,setIsEdit] = useState<any> (false);
         const [recordsData, setRecordsData] = useState<any>(initialRecords);
-        const [addEmployeeModal,setAddEmployeeModal] = useState<any> (false);
+        const [addTypesFuelModal,setAddTypesFuelModal] = useState<any> (false);
         const [search, setSearch] = useState('');
         const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
             columnAccessor: 'id',
@@ -73,10 +67,7 @@ const Empleados = () => {
             setRecordsData(() => {
                 return initialRecords.filter((item: any) => {
                     return (
-                        item.nombre.toString().toLowerCase().includes(search.toLowerCase()) ||
-                        item.cedula.toLowerCase().includes(search.toLowerCase()) ||
-                        item.fechaIngreso.toLowerCase().includes(search.toLowerCase()) ||
-                        item.tandaLabor.toLowerCase().includes(search.toLowerCase())
+                        item.descripcion?.toString().toLowerCase().includes(search.toLowerCase())
                     );
                 });
             });
@@ -90,14 +81,13 @@ const Empleados = () => {
 
         const addEditData = (row: any = null) => {
             if (row) {
-                setIsEdit(true);
                 setSaveParams(row);
             }
-            setAddEmployeeModal(true);
+            setAddTypesFuelModal(true);
         };
 
         const deleteItem = async (row: any) => {
-            const resp = await apiDelete({ path: 'empleados', data: saveParams, id: row.id });
+            const resp = await apiDelete({ path: 'tiposcombustible', data: saveParams, id: row.id });
             let message = {};
     
             if (resp.info[0]?.msg !== 'ok') {
@@ -105,7 +95,7 @@ const Empleados = () => {
             } else {
                 message = { msg: 'Register has been Deleted' };
     
-               fentchEmployee();
+               fentchTypesFuel();
             }
     
             showMessage(message);
@@ -116,7 +106,7 @@ const Empleados = () => {
             <>
                 <div className="panel">
                     <div className="mb-5 flex flex-col gap-5 md:flex-row md:items-center">
-                        <h5 className="text-lg font-semibold dark:text-white-light">Empleados</h5>
+                        <h5 className="text-lg font-semibold dark:text-white-light">TiposCombustible</h5>
                         <div className="flex w-full flex-col items-center gap-5 md:w-auto md:flex-row ltr:ml-auto rtl:mr-auto">
                         <div className="flex w-full flex-col gap-5 md:w-auto md:flex-row md:items-center">
                             <button type="button" 
@@ -135,16 +125,7 @@ const Empleados = () => {
                             records={recordsData}
                             columns={[
                                 { accessor: 'id', title: 'ID', sortable: true },
-                                { accessor: 'nombre', title: 'Nombre', sortable: true },
-                                { accessor: 'cedula', title: 'Cedula', sortable: true },
-                                { accessor: 'tandaLabor', title: 'Tanda', sortable: true },
-                                { accessor: 'porcientoComision', title: 'Comision', sortable: true },
-                                { 
-                                    accessor: 'fechaIngreso', 
-                                    title: 'Ingreso', 
-                                    sortable: true,
-                                    render: ({ fechaIngreso }) => <div>{formatDateTime(fechaIngreso)}</div>
-                                },
+                                { accessor: 'descripcion', title: 'Descripcion', sortable: true },
                                 {
                                     accessor: 'estado_Id',
                                     title: 'Estado',
@@ -204,19 +185,17 @@ const Empleados = () => {
                         />
                     </div>
                 </div>
-                <SaveEmpleadosModal
-                    addEmployeeModal={addEmployeeModal}
-                    setAddEmployeeModal={setAddEmployeeModal}
+                <SaveTiposCombustibleModal
+                    addTypesFuelModal={addTypesFuelModal}
+                    setAddTypesFuelModal={setAddTypesFuelModal}
                     saveParams={saveParams}
                     setSaveParams={setSaveParams}
-                    fentchEmployee={fentchEmployee}
-                    employeeDefault={employeeDefault}
-                    isEdit={isEdit}
-                    setIsEdit={setIsEdit}
+                    fentchTypesFuel={fentchTypesFuel}
+                    typesfuelDefault={typesfuelDefault}
                 />
             </>
         );
  
 };
 
-export default Empleados;
+export default TiposCombustible;

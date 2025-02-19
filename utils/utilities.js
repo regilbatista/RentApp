@@ -8,10 +8,10 @@ export const formatDateTime = (date) => {
 };
 
 
-export const errorValidation = (errorsTags, insertUpdateParams) => {
+export const errorValidation = (errorsTags, saveParams) => {
     const emptyList = [];
     errorsTags.map((item) => {
-        if (insertUpdateParams[item] === '' || insertUpdateParams[item] === null) emptyList.push(item);
+        if (saveParams[item] === '' || saveParams[item] === null) emptyList.push(item);
     });
     return emptyList;
 };

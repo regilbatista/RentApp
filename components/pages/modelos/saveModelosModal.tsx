@@ -16,43 +16,42 @@ const selectDefault: {
     label: string;
 }[] = [];
 
-    const SaveEmpleadosModal = (props: any) => {
-        const { addEmployeeModal, setAddEmployeeModal, setSaveParams, saveParams, fentchEmployee, employeeDefault, isEdit, setIsEdit } = props;
+    const SaveModelosModal = (props: any) => {
+        const { addModelsModal, setAddModelsModal, setSaveParams, saveParams, fentchModels, modelsDefault } = props;
         const [errors, setErrors] = useState<String[]>([]);
-        const errorsTags = ['nombre', 'cedula', 'tandaLabor', 'porcientoComision','fechaIngreso',!isEdit && 'rol_Id'];
-        const listTanda = ['Matutina', 'Vespertina', 'Nocturna'];
+        const errorsTags = ['descripcion'];
         const [loading, setLoading] = useState(false);
-        const [displayedUsers, setdisplayedUsers] = useState(JSON.parse(JSON.stringify(selectDefault)));
-        //const [allUser, setAllUser] = useState<any>([]);
+        const [displayedModels, setdisplayedModels] = useState(JSON.parse(JSON.stringify(selectDefault)));
+        //const [allBrand, setallBrand] = useState<any>([]);
         
-        let allUser: any = useRef(null);
+        let allBrand: any = useRef(null);
 
         useEffect (() => { 
             console.log(saveParams,'saveParams');
         }, [saveParams]);
 
         
-    const promiseOptionsUser = async (inputValue: string, id: any) => {
+    const promiseOptionsModels = async (inputValue: string, id: any) => {
         let result = [];
 
         if (inputValue !== '') {
-            result = allUser.current.filter((item: any) => {
+            result = allBrand.current.filter((item: any) => {
                 return item.name.toString().toLowerCase().includes(inputValue.toLowerCase());
             });
         } else {
-            const response = await apiGet({ path: 'empleados/users' });
+            const response = await apiGet({ path: 'marcas' });
             result = response.info;
-            allUser.current = result;
+            allBrand.current = result;
         }
 
         result = result.map((item: any) => {
                 return {
                     value: item.id,
-                    label: item.user, 
+                    label: item.descripcion, 
                 };
         });
 
-        setdisplayedUsers(result.filter((i: any) => i.value !== id));
+        setdisplayedModels(result.filter((i: any) => i.value !== id));
 
         return result.filter((i: any) => i.value !== id);
     };
@@ -81,8 +80,9 @@ const selectDefault: {
             });
         };
 
-        const saveEmployee = async () => {
+        const saveModels = async () => {
            try {
+            saveParams.estado_Id=1;
                 setLoading(true);
                 const errorsCount = checkErrors();
                 if (errorsCount > 0) {
@@ -92,31 +92,35 @@ const selectDefault: {
                 if (saveParams.id) {
                     // Update task
                     const id = saveParams.id;
-                    const resp = await apiPatch({ path: 'empleados', data: saveParams, id });
+                    const resp = await apiPatch({ path: 'modelos', data: saveParams, id });
                     if (resp?.info?.[0]?.msg !== 'ok') {
                         setLoading(false);
                         // Added optional chaining
-                        showMessage({msg:'Error saving ticket', type:'error'});
+                        showMessage({msg:'Error saving item', type:'error'});
                     } else {
-                        fentchEmployee();
+                        fentchModels();
+                        showMessage({msg:'Item saved successfully', type: 'success'});
                         close();
                     }
 
                 } else {
                     // Insert task
-                    const resp = await apiPost({ path: 'empleados', data: saveParams });
+                    const resp = await apiPost({ path: 'modelos', data: saveParams });
                     const id = resp?.info?.[0]?.id ?? null; // Added optional chaining and nullish coalescing
-
+                    const msg = resp?.info?.[0]?.msg ?? null;
+                    console.log(id, 'id');
                 if (id === null) {
                     setLoading(false);
-                    showMessage({msg:'Error saving the Item', type:'error'});
+                   
+                    showMessage({msg: msg ? msg : 'Error saving item' , type:'error'});
                 } else {
-                    fentchEmployee();
-                    showMessage({msg:'The Item has been saved successfully.'});
+                    fentchModels();
+                    showMessage({msg:'Item saved successfully', type: 'success'});
                     close();
                 }
                 }
-               
+                
+     
                 
                 // refreshTasks();
             } catch (error) {
@@ -128,27 +132,23 @@ const selectDefault: {
         }
 
         const onChangeValue = (newValue: any) => {
-            setSaveParams({ ...saveParams, user_Id: newValue.value });
+            setSaveParams({ ...saveParams, marca_Id: newValue.value });
         };
-
+    
         const close = () => {
             setErrors([]);
-            setIsEdit(false);
-            setAddEmployeeModal(false);
-            setSaveParams(employeeDefault);
+            setAddModelsModal(false);
+            setSaveParams(modelsDefault);
         }
-
-    
 
 
     return (
-        <Transition appear show={addEmployeeModal} as={Fragment}>
+        <Transition appear show={addModelsModal} as={Fragment}>
             <Dialog
                 as="div"
-                open={addEmployeeModal}
+                open={addModelsModal}
                 onClose={() => {
                     close();
-                    //     setRemote(false);
                 }}
                 className="relative z-50"
             >
@@ -175,7 +175,7 @@ const selectDefault: {
                             >
                                 <div className="flex items-center justify-between bg-[#fbfbfb] px-5 py-3 dark:bg-[#121c2c]">
                                     <div className="bg-[#fbfbfb] py-3 text-lg font-medium ltr:pl-5 ltr:pr-[50px] rtl:pl-[50px] rtl:pr-5 dark:bg-[#121c2c]">
-                                        {saveParams?.id ? 'Editar empleados' : 'Añadir empleados'}
+                                        {saveParams?.id ? 'Editar modelos' : 'Añadir modelos'}
                                     </div>
                                     <button
                                         type="button"
@@ -208,104 +208,28 @@ const selectDefault: {
                                         <div
                                         //className={`${auth.permissions.includes('sys-adm') || auth.permissions.includes('it-access') ? 'lg:m-3 lg:w-[36%]' : ''} min-w-[250px]`}
                                         >
-                                            <div className={`mb-5 ${errors.includes('nombre') ? 'has-error' : ''}`}>
-                                                <label htmlFor="nombre" className="form-label flex">
-                                                    nombre
+                                            <div className={`mb-5 ${errors.includes('descripcion') ? 'has-error' : ''}`}>
+                                                <label htmlFor="descripcion" className="form-label flex">
+                                                    descripcion
                                                 </label>
                                                 <input
-                                                    id="nombre"
+                                                    id="descripcion"
                                                     type="text"
-                                                    placeholder="Enter nombre del empleado"
+                                                    placeholder="Enter descripcion del cliente"
                                                     className="form-input"
-                                                    value={saveParams.nombre}
+                                                    value={saveParams.descripcion}
                                                     onChange={(e) => changeValue(e)}
                                                 />
                                             </div>
-                                            <div className={`mb-5 ${errors.includes('cedula') ? 'has-error' : ''}`}>
-                                                <label htmlFor="cedula" className="form-label flex">
-                                                    Cedula
-                                                </label>
-                                                <InputMask
-                                                    id="cedula"
-                                                    type="text"
-                                                    placeholder="000-0000000-0"
-                                                    className="form-input"
-                                                    mask="999-9999999-9"
-                                                    value={saveParams.cedula}
-                                                    onBlur={handleBlur}
-                                                    onChange={(e: any) => changeValue(e)}
-                                                />
-                                            </div>
-                                            <div className="mb-5 flex w-full flex-row gap-4">
-                                                <div className={`flex-1 ${errors.includes('tandaLabor') ? 'has-error' : ''}`}>
-                                                    <label htmlFor="tandaLabor" className="form-label flex">
-                                                        Tanda
-                                                    </label>
-                                                    <select id="tandaLabor" className="form-select w-full" value={saveParams.tandaLabor || ''} onChange={changeValue}>
-                                                        <option value="">Seleccione la tanda</option>
-                                                        {listTanda.map((tanda: any, i: number) => (
-                                                            <option key={i} value={tanda}>
-                                                                {tanda}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-
-                                                <div className={`flex-1 ${errors.includes('porcientoComision') ? 'has-error' : ''}`}>
-                                                    <label htmlFor="porcientoComision" className="form-label flex">
-                                                        Porcentaje de Comisión
-                                                    </label>
-                                                    <input
-                                                        id="porcientoComision"
-                                                        type="number"
-                                                        placeholder="Ingrese el porcentaje"
-                                                        className="form-input w-full"
-                                                        value={saveParams.porcientoComision || ''}
-                                                        onBlur={handleBlur}
-                                                        onChange={(e: any) => changeValue(e)}
-                                                        min="0"
-                                                        max="100.00"
-                                                        step="0.01"
-                                                        onInput={(e: any) => {
-                                                            // Asegurarse de que el valor no sea menor que 0.01 ni mayor que 100
-                                                            if (e.target.value < 0.01) {
-                                                              e.target.value = 0.01;
-                                                            } else if (e.target.value > 100) {
-                                                              e.target.value = 100;
-                                                            }
-                                                        
-                                                            // Limitar a 2 decimales
-                                                            if (e.target.value && e.target.value.includes('.')) {
-                                                              let [integer, decimal] = e.target.value.split('.');
-                                                              if (decimal && decimal.length > 2) {
-                                                                e.target.value = `${integer}.${decimal.substring(0, 2)}`;
-                                                              }
-                                                            }
-                                                          }}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className={`mb-5 ${errors.includes('fechaIngreso') ? 'has-error' : ''}`}>
-                                                <label htmlFor="fechaIngreso">Fecha de Ingreso</label>
-                                                <input
-                                                    id="fechaIngreso"
-                                                    type="date"
-                                                    name="fechaIngreso"
-                                                    className={`form-input w-full rounded border p-2`}
-                                                    value={split(saveParams.fechaIngreso, 'T')[0]}
-                                                    onChange={(e) => changeValue(e)}
-                                                />
-                                            </div>
-                                            <div className={`custom-select css-b62m3t-container mb-5 ${errors.includes('user_Id') ? 'has-error' : ''}`}>
+                                            <div className={`custom-select css-b62m3t-container mb-5 ${errors.includes('marca_Id') ? 'has-error' : ''}`}>
                                                     <label htmlFor="selectTicketType" className="flex">
-                                                        Users 
+                                                        Marca 
                                                     </label>
                                                     <AsyncSelect //Category
                                                         cacheOptions
                                                         defaultOptions
-                                                        value={displayedUsers.filter((i: any) => i.value == saveParams.user_Id)[0]}
-                                                        loadOptions={promiseOptionsUser}
+                                                        value={displayedModels.filter((i: any) => i.value == saveParams.marca_Id)[0]}
+                                                        loadOptions={promiseOptionsModels}
                                                         onChange={(newValue: any) => onChangeValue(newValue)}
                                                         menuPlacement="auto"
                                                         maxMenuHeight={120}
@@ -333,7 +257,7 @@ const selectDefault: {
                                                 <button
                                                     type="button"
                                                     className={`btn btn-success gap-2 ltr:ml-4 rtl:mr-4 ${loading ? 'cursor-not-allowed opacity-50' : ''}`}
-                                                    onClick={() => saveEmployee()}
+                                                    onClick={() => saveModels()}
                                                     disabled={loading}
                                                 >
                                                     {loading ? (
@@ -360,4 +284,4 @@ const selectDefault: {
         </Transition>
     );
 };
-export default SaveEmpleadosModal;
+export default SaveModelosModal;

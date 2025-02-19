@@ -8,34 +8,36 @@ import { setPageTitle } from '../../../store/themeConfigSlice';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import {showMessage, showConfirm} from '@/utils/notifications';
 import {formatDateTime} from '@/utils/utilities';
-import { apiGet, apiDelete } from '@/lib/api/admin';
-import SaveEmpleadosModal from '@/components/pages/empleados/saveEmpleadosModal';
+import { apiGet, apiDelete } from '@/lib/api/main';
+import SaveVehiculosModal from '@/components/pages/vehiculos/saveVehiculosModal';
 
-const PATH = 'empleados';
+const PATH = 'vehiculos';
 
-const employeeDefault = {
+const vehiclesDefault = {
     id: null,
-    nombre: '',
-    cedula: '',
-    tandaLabor: '',
-    porcientoComision: null,
-    fechaIngreso: null,
+    descripcion: '',
+    NoChasis: '',
+    NoMotor: '',
+    NoPlaca: '',
+    tipoVehiculo_Id: null,
+    marca_Id: null,
+    modelo_Id: null,
+    tipoCombustible_Id: null,
     estado_Id: 1,
-    user_Id: null,
     
 };
 
-const Empleados = () => {
+const Vehiculos = () => {
 
 
     useEffect(() => {
-        fentchEmployee();
+        fentchVehicles();
         //-setProjects(projects.info);
     },[]);
 
 
-       const fentchEmployee = async ()  =>{
-        const emp = await apiGet({ path: 'empleados' });
+       const fentchVehicles = async ()  =>{
+        const emp = await apiGet({ path: 'vehiculos' });
         setInitialRecords(sortBy(emp?.info, 'id'))
 
        }
@@ -47,12 +49,11 @@ const Empleados = () => {
     
         const [page, setPage] = useState(1);
         const PAGE_SIZES = [10, 20, 30, 50, 100];
-        const [saveParams, setSaveParams] = useState<any>(JSON.parse(JSON.stringify(employeeDefault)));
+        const [saveParams, setSaveParams] = useState<any>(JSON.parse(JSON.stringify(vehiclesDefault)));
         const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
         const [initialRecords, setInitialRecords] = useState<any>([]);
-        const [isEdit,setIsEdit] = useState<any> (false);
         const [recordsData, setRecordsData] = useState<any>(initialRecords);
-        const [addEmployeeModal,setAddEmployeeModal] = useState<any> (false);
+        const [addVehiclesModal,setAddVehiclesModal] = useState<any> (false);
         const [search, setSearch] = useState('');
         const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
             columnAccessor: 'id',
@@ -73,10 +74,10 @@ const Empleados = () => {
             setRecordsData(() => {
                 return initialRecords.filter((item: any) => {
                     return (
-                        item.nombre.toString().toLowerCase().includes(search.toLowerCase()) ||
-                        item.cedula.toLowerCase().includes(search.toLowerCase()) ||
-                        item.fechaIngreso.toLowerCase().includes(search.toLowerCase()) ||
-                        item.tandaLabor.toLowerCase().includes(search.toLowerCase())
+                        item.nombre?.toString().toLowerCase().includes(search.toLowerCase()) ||
+                        item.cedula?.toLowerCase().includes(search.toLowerCase()) ||
+                        item.NoTarjetaCR?.toLowerCase().includes(search.toLowerCase()) ||
+                        item.tipoPersona?.toLowerCase().includes(search.toLowerCase())
                     );
                 });
             });
@@ -90,14 +91,13 @@ const Empleados = () => {
 
         const addEditData = (row: any = null) => {
             if (row) {
-                setIsEdit(true);
                 setSaveParams(row);
             }
-            setAddEmployeeModal(true);
+            setAddVehiclesModal(true);
         };
 
         const deleteItem = async (row: any) => {
-            const resp = await apiDelete({ path: 'empleados', data: saveParams, id: row.id });
+            const resp = await apiDelete({ path: 'vehiculos', data: saveParams, id: row.id });
             let message = {};
     
             if (resp.info[0]?.msg !== 'ok') {
@@ -105,7 +105,7 @@ const Empleados = () => {
             } else {
                 message = { msg: 'Register has been Deleted' };
     
-               fentchEmployee();
+               fentchVehicles();
             }
     
             showMessage(message);
@@ -116,7 +116,7 @@ const Empleados = () => {
             <>
                 <div className="panel">
                     <div className="mb-5 flex flex-col gap-5 md:flex-row md:items-center">
-                        <h5 className="text-lg font-semibold dark:text-white-light">Empleados</h5>
+                        <h5 className="text-lg font-semibold dark:text-white-light">Vehiculos</h5>
                         <div className="flex w-full flex-col items-center gap-5 md:w-auto md:flex-row ltr:ml-auto rtl:mr-auto">
                         <div className="flex w-full flex-col gap-5 md:w-auto md:flex-row md:items-center">
                             <button type="button" 
@@ -137,14 +137,9 @@ const Empleados = () => {
                                 { accessor: 'id', title: 'ID', sortable: true },
                                 { accessor: 'nombre', title: 'Nombre', sortable: true },
                                 { accessor: 'cedula', title: 'Cedula', sortable: true },
-                                { accessor: 'tandaLabor', title: 'Tanda', sortable: true },
-                                { accessor: 'porcientoComision', title: 'Comision', sortable: true },
-                                { 
-                                    accessor: 'fechaIngreso', 
-                                    title: 'Ingreso', 
-                                    sortable: true,
-                                    render: ({ fechaIngreso }) => <div>{formatDateTime(fechaIngreso)}</div>
-                                },
+                                { accessor: 'NoTarjetaCR', title: 'Tarjeta', sortable: true },
+                                { accessor: 'limiteCredito', title: 'Limite', sortable: true },
+                                { accessor: 'tipoPersona', title: 'Tipo de persona', sortable: true },
                                 {
                                     accessor: 'estado_Id',
                                     title: 'Estado',
@@ -204,19 +199,17 @@ const Empleados = () => {
                         />
                     </div>
                 </div>
-                <SaveEmpleadosModal
-                    addEmployeeModal={addEmployeeModal}
-                    setAddEmployeeModal={setAddEmployeeModal}
+                <SaveVehiculosModal
+                    addVehiclesModal={addVehiclesModal}
+                    setAddVehiclesModal={setAddVehiclesModal}
                     saveParams={saveParams}
                     setSaveParams={setSaveParams}
-                    fentchEmployee={fentchEmployee}
-                    employeeDefault={employeeDefault}
-                    isEdit={isEdit}
-                    setIsEdit={setIsEdit}
+                    fentchVehicles={fentchVehicles}
+                    vehiclesDefault={vehiclesDefault}
                 />
             </>
         );
  
 };
 
-export default Empleados;
+export default Vehiculos;

@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import { getToken } from '../../utils/auth';
 import { useAuth } from '@/src/context/authContext';
 import { getUserFromStorage } from '@/utils/auth';
+import { showUnauthorized }from '@/utils/auth'
 
 const DefaultLayout = ({ children }: PropsWithChildren) => {
     const router = useRouter();

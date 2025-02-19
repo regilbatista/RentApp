@@ -8,7 +8,7 @@ import { split } from 'lodash';
 import InputMask from 'react-input-mask';
 import {showMessage} from '@/utils/notifications'
 import { validaCedula } from '@/utils/utilities';
-import { apiGet, apiPost, apiPatch } from '@/lib/api/main';
+import { apiGet, apiPost, apiPatch } from '@/lib/api/admin';
 
 
 const selectDefault: {
@@ -19,43 +19,15 @@ const selectDefault: {
     const SaveTiposVehiculosModal = (props: any) => {
         const { addTypesVehiclesModal, setAddTypesVehiclesModal, setSaveParams, saveParams, fentchTypesVehicles, typesvehiclesDefault } = props;
         const [errors, setErrors] = useState<String[]>([]);
-        const errorsTags = ['nombre', 'cedula', 'NoTarjetaCR', 'limiteCredito','tipoPersona'];
-        const listPersona = ['Física', 'Jurídica'];
+        const errorsTags = ['descripcion'];
+       //const listPersona = ['Física', 'Jurídica'];
         const [loading, setLoading] = useState(false);
         const [displayedUsers, setdisplayedUsers] = useState(JSON.parse(JSON.stringify(selectDefault)));
         //const [allUser, setAllUser] = useState<any>([]);
         
-        let allUser: any = useRef(null);
-
         useEffect (() => { 
             console.log(saveParams,'saveParams');
         }, [saveParams]);
-
-        
-    const promiseOptionsUser = async (inputValue: string, id: any) => {
-        let result = [];
-
-        if (inputValue !== '') {
-            result = allUser.current.filter((item: any) => {
-                return item.name.toString().toLowerCase().includes(inputValue.toLowerCase());
-            });
-        } else {
-            const response = await apiGet({ path: 'tiposvehiculos/users' });
-            result = response.info;
-            allUser.current = result;
-        }
-
-        result = result.map((item: any) => {
-                return {
-                    value: item.id,
-                    label: item.user, 
-                };
-        });
-
-        setdisplayedUsers(result.filter((i: any) => i.value !== id));
-
-        return result.filter((i: any) => i.value !== id);
-    };
 
 
         const changeValue = (e: any) => {
@@ -71,15 +43,6 @@ const selectDefault: {
             return emptyList.length;
         };
 
-        const handleBlur = () => {
-            setErrors((prevErrors) => {
-                if (!validaCedula(saveParams.cedula)) {
-                    return Array.from(new Set([...prevErrors, 'cedula'])); // Convierte el Set a Array
-                } else {
-                    return prevErrors.filter((error) => error !== 'cedula'); // Remueve si es válida
-                }
-            });
-        };
 
         const saveTypesVehicles = async () => {
            try {
@@ -209,96 +172,18 @@ const selectDefault: {
                                         <div
                                         //className={`${auth.permissions.includes('sys-adm') || auth.permissions.includes('it-access') ? 'lg:m-3 lg:w-[36%]' : ''} min-w-[250px]`}
                                         >
-                                            <div className={`mb-5 ${errors.includes('nombre') ? 'has-error' : ''}`}>
-                                                <label htmlFor="nombre" className="form-label flex">
-                                                    nombre
+                                            <div className={`mb-5 ${errors.includes('descripcion') ? 'has-error' : ''}`}>
+                                                <label htmlFor="descripcion" className="form-label flex">
+                                                    descripcion
                                                 </label>
                                                 <input
-                                                    id="nombre"
+                                                    id="descripcion"
                                                     type="text"
-                                                    placeholder="Enter nombre del cliente"
+                                                    placeholder="Enter descripcion del cliente"
                                                     className="form-input"
-                                                    value={saveParams.nombre}
+                                                    value={saveParams.descripcion}
                                                     onChange={(e) => changeValue(e)}
                                                 />
-                                            </div>
-                                            <div className={`mb-5 ${errors.includes('cedula') ? 'has-error' : ''}`}>
-                                                <label htmlFor="cedula" className="form-label flex">
-                                                    Cedula
-                                                </label>
-                                                <InputMask
-                                                    id="cedula"
-                                                    type="text"
-                                                    placeholder="000-0000000-0"
-                                                    className="form-input"
-                                                    mask="999-9999999-9"
-                                                    value={saveParams.cedula}
-                                                    onBlur={handleBlur}
-                                                    onChange={(e: any) => changeValue(e)}
-                                                />
-                                            </div>
-                                            <div className={`mb-5 ${errors.includes('NoTarjetaCR') ? 'has-error' : ''}`}>
-                                                <label htmlFor="NoTarjetaCR" className="form-label flex">
-                                                    No. tarjeta de credito 
-                                                </label>
-                                                <InputMask
-                                                    id="NoTarjetaCR"
-                                                    type="text"
-                                                    placeholder="0000-0000-0000-0000"
-                                                    className="form-input"
-                                                    mask="9999-9999-9999-9999"
-                                                    value={saveParams.NoTarjetaCR}
-                                                    onBlur={handleBlur}
-                                                    onChange={(e: any) => changeValue(e)}
-                                                />
-                                            </div>
-
-                                            <div className="mb-5 flex w-full flex-row gap-4">
-                                            <div className={`flex-1 ${errors.includes('limiteCredito') ? 'has-error' : ''}`}>
-                                                    <label htmlFor="limiteCredito" className="form-label flex">
-                                                        Porcentaje de Comisión
-                                                    </label>
-                                                    <input
-                                                        id="limiteCredito"
-                                                        type="number"
-                                                        placeholder="Ingrese el porcentaje"
-                                                        className="form-input w-full"
-                                                        value={saveParams.limiteCredito || ''}
-                                                        onBlur={handleBlur}
-                                                        onChange={(e: any) => changeValue(e)}
-                                                        min="0"
-                                                        max="10000000000000.00"
-                                                        step="0.01"
-                                                        onInput={(e: any) => {
-                                                            if (e.target.value < 1) {
-                                                              e.target.value = 1;
-                                                            } else if (e.target.value > 10000000000000) {
-                                                              e.target.value = 10000000000000;
-                                                            }
-                                                        
-                                                            // Limitar a 2 decimales
-                                                            if (e.target.value && e.target.value.includes('.')) {
-                                                              let [integer, decimal] = e.target.value.split('.');
-                                                              if (decimal && decimal.length > 2) {
-                                                                e.target.value = `${integer}.${decimal.substring(0, 2)}`;
-                                                              }
-                                                            }
-                                                          }}
-                                                    />
-                                                </div>
-                                                <div className={`flex-1 ${errors.includes('tipoPersona') ? 'has-error' : ''}`}>
-                                                    <label htmlFor="tipoPersona" className="form-label flex">
-                                                        Tanda
-                                                    </label>
-                                                    <select id="tipoPersona" className="form-select w-full" value={saveParams.tipoPersona || ''} onChange={changeValue}>
-                                                        <option value="">Seleccione la tanda</option>
-                                                        {listPersona.map((tanda: any, i: number) => (
-                                                            <option key={i} value={tanda}>
-                                                                {tanda}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
                                             </div>
                                         </div>
 

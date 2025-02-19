@@ -8,18 +8,14 @@ import { setPageTitle } from '../../../store/themeConfigSlice';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import {showMessage, showConfirm} from '@/utils/notifications';
 import {formatDateTime} from '@/utils/utilities';
-import { apiGet, apiDelete } from '@/lib/api/main';
-import SaveTiposVehiculosModal from '@/components/pages/tiposvehiculos/saveTiposVehiculosModal';
+import { apiGet, apiDelete } from '@/lib/api/admin';
+import SaveTiposVehiculosModal from '@/components/pages/typesVehicles/saveTiposVehiculosModal';
 
 const PATH = 'tiposvehiculos';
 
 const typesvehiclesDefault = {
     id: null,
-    nombre: '',
-    cedula: '',
-    NoTarjetaCR: '',
-    limiteCredito: null,
-    tipoPersona: '',
+    descripcion: '',
     estado_Id: 1,
     
 };
@@ -71,7 +67,7 @@ const TiposVehiculos = () => {
             setRecordsData(() => {
                 return initialRecords.filter((item: any) => {
                     return (
-                        item.nombre?.toString().toLowerCase().includes(search.toLowerCase()) ||
+                        item.descripcion?.toString().toLowerCase().includes(search.toLowerCase()) ||
                         item.cedula?.toLowerCase().includes(search.toLowerCase()) ||
                         item.NoTarjetaCR?.toLowerCase().includes(search.toLowerCase()) ||
                         item.tipoPersona?.toLowerCase().includes(search.toLowerCase())
@@ -132,11 +128,7 @@ const TiposVehiculos = () => {
                             records={recordsData}
                             columns={[
                                 { accessor: 'id', title: 'ID', sortable: true },
-                                { accessor: 'nombre', title: 'Nombre', sortable: true },
-                                { accessor: 'cedula', title: 'Cedula', sortable: true },
-                                { accessor: 'NoTarjetaCR', title: 'Tarjeta', sortable: true },
-                                { accessor: 'limiteCredito', title: 'Limite', sortable: true },
-                                { accessor: 'tipoPersona', title: 'Tipo de persona', sortable: true },
+                                { accessor: 'descripcion', title: 'Descripcion', sortable: true },
                                 {
                                     accessor: 'estado_Id',
                                     title: 'Estado',

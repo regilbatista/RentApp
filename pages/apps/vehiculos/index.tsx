@@ -8,7 +8,7 @@ import { setPageTitle } from '../../../store/themeConfigSlice';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import {showMessage, showConfirm} from '@/utils/notifications';
 import {formatDateTime} from '@/utils/utilities';
-import { apiGet, apiDelete } from '@/lib/api/main';
+import { apiGet, apiDelete } from '@/lib/api/admin';
 import SaveVehiculosModal from '@/components/pages/vehiculos/saveVehiculosModal';
 
 const PATH = 'vehiculos';
@@ -135,11 +135,14 @@ const Vehiculos = () => {
                             records={recordsData}
                             columns={[
                                 { accessor: 'id', title: 'ID', sortable: true },
-                                { accessor: 'nombre', title: 'Nombre', sortable: true },
-                                { accessor: 'cedula', title: 'Cedula', sortable: true },
-                                { accessor: 'NoTarjetaCR', title: 'Tarjeta', sortable: true },
-                                { accessor: 'limiteCredito', title: 'Limite', sortable: true },
-                                { accessor: 'tipoPersona', title: 'Tipo de persona', sortable: true },
+                                { accessor: 'descripcion', title: 'Descripcion', sortable: true },
+                                { accessor: 'NoChasis', title: 'No.Chasis', sortable: true },
+                                { accessor: 'NoMotor', title: 'No.Motor', sortable: true },
+                                { accessor: 'NoPlaca', title: 'No.Placa', sortable: true },
+                                { accessor: 'TiposVehiculo.descripcion', title: 'Tipo', sortable: true },
+                                { accessor: 'TiposCombustible.descripcion', title: 'Combustible', sortable: true },
+                                { accessor: 'Marca.descripcion', title: 'Marca', sortable: true },
+                                { accessor: 'Modelo.descripcion', title: 'Modelo', sortable: true },
                                 {
                                     accessor: 'estado_Id',
                                     title: 'Estado',

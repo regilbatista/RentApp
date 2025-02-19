@@ -17,45 +17,124 @@ const selectDefault: {
 }[] = [];
 
     const SaveVehiculosModal = (props: any) => {
-        const { addEmployeeModal, setAddEmployeeModal, setSaveParams, saveParams, fentchVehicles, employeeDefault } = props;
+        const { addVehiclesModal, setAddVehiclesModal, setSaveParams, saveParams, fentchVehicles, vehiclesDefault } = props;
         const [errors, setErrors] = useState<String[]>([]);
         const errorsTags = ['descripcion', 'NoChasis', 'NoMotor', 'NoPlaca','tipoVehiculo_Id', 'marca_Id', 'modelo_Id', 'tipoCombustible_Id'];
         const [loading, setLoading] = useState(false);
-        const [displayedUsers, setdisplayedUsers] = useState(JSON.parse(JSON.stringify(selectDefault)));
+        const [displayedTipoVehiculo, setdisplayedTipoVehiculo] = useState(JSON.parse(JSON.stringify(selectDefault)));
+        const [displayedTipoCombustible, setdisplayedTipoCombustible] = useState(JSON.parse(JSON.stringify(selectDefault)));
+        const [displayedBrand, setdisplayedBrand] = useState(JSON.parse(JSON.stringify(selectDefault)));
+        const [displayedModel, setdisplayedModel] = useState(JSON.parse(JSON.stringify(selectDefault)));
         //const [allUser, setAllUser] = useState<any>([]);
         
         let allUser: any = useRef(null);
+        let allTipoVehiculo: any = useRef(null);
+        let allTipoCombustible: any = useRef(null);
+        let allBrand: any = useRef(null);
+        let allModel: any = useRef(null);
 
         useEffect (() => { 
             console.log(saveParams,'saveParams');
         }, [saveParams]);
 
         
-    const promiseOptionsUser = async (inputValue: string, id: any) => {
+    const promiseOptionsTipoVehiculo = async (inputValue: string, id: any) => {
         let result = [];
 
         if (inputValue !== '') {
-            result = allUser.current.filter((item: any) => {
-                return item.name.toString().toLowerCase().includes(inputValue.toLowerCase());
+            result = allTipoVehiculo.current.filter((item: any) => {
+                return item.descripcion.toString().toLowerCase().includes(inputValue.toLowerCase());
             });
         } else {
-            const response = await apiGet({ path: 'vehiculos/users' });
+            const response = await apiGet({ path: 'tiposVehiculos' });
             result = response.info;
-            allUser.current = result;
+            allTipoVehiculo.current = result;
         }
 
         result = result.map((item: any) => {
                 return {
                     value: item.id,
-                    label: item.user, 
+                    label: item.descripcion, 
                 };
         });
 
-        setdisplayedUsers(result.filter((i: any) => i.value !== id));
+        setdisplayedTipoVehiculo(result.filter((i: any) => i.value !== id));
+
+        return result.filter((i: any) => i.value !== id);
+    };
+    const promiseOptionsTipoCombustible = async (inputValue: string, id: any) => {
+        let result = [];
+
+        if (inputValue !== '') {
+            result = allTipoCombustible.current.filter((item: any) => {
+                return item.descripcion.toString().toLowerCase().includes(inputValue.toLowerCase());
+            });
+        } else {
+            const response = await apiGet({ path: 'tiposCombustible' });
+            result = response.info;
+            allTipoCombustible.current = result;
+        }
+
+        result = result.map((item: any) => {
+                return {
+                    value: item.id,
+                    label: item.descripcion, 
+                };
+        });
+
+        setdisplayedTipoCombustible(result.filter((i: any) => i.value !== id));
 
         return result.filter((i: any) => i.value !== id);
     };
 
+    const promiseOptionsBrand = async (inputValue: string, id: any) => {
+        let result = [];
+
+        if (inputValue !== '') {
+            result = allBrand.current.filter((item: any) => {
+                return item.descripcion.toString().toLowerCase().includes(inputValue.toLowerCase());
+            });
+        } else {
+            const response = await apiGet({ path: 'marcas' });
+            result = response.info;
+            allBrand.current = result;
+        }
+
+        result = result.map((item: any) => {
+                return {
+                    value: item.id,
+                    label: item.descripcion, 
+                };
+        });
+
+        setdisplayedBrand(result.filter((i: any) => i.value !== id));
+
+        return result.filter((i: any) => i.value !== id);
+    };
+    const promiseOptionsModel = async (inputValue: string, id: any) => {
+        let result = [];
+
+        if (inputValue !== '') {
+            result = allModel.current.filter((item: any) => {
+                return item.descripcion.toString().toLowerCase().includes(inputValue.toLowerCase());
+            });
+        } else {
+            const response = await apiGet({ path: 'modelos' });
+            result = response.info;
+            allModel.current = result;
+        }
+
+        result = result.map((item: any) => {
+                return {
+                    value: item.id,
+                    label: item.descripcion, 
+                };
+        });
+
+        setdisplayedModel(result.filter((i: any) => i.value !== id));
+
+        return result.filter((i: any) => i.value !== id);
+    };
 
         const changeValue = (e: any) => {
             const { value, id } = e.target;
@@ -80,7 +159,7 @@ const selectDefault: {
             });
         };
 
-        const saveEmployee = async () => {
+        const saveVehicles = async () => {
            try {
                 setLoading(true);
                 const errorsCount = checkErrors();
@@ -126,23 +205,27 @@ const selectDefault: {
             }
         }
 
-        const onChangeValue = (newValue: any) => {
-            setSaveParams({ ...saveParams, user_Id: newValue.value });
+        const onChangeValue = (newValue: any, input: string ) => {
+
+            if (input === 'tipoVehiculo_Id') setSaveParams({ ...saveParams, tipoVehiculo_Id: newValue.value });
+            if (input === 'tipoCombustible_Id') setSaveParams({ ...saveParams, tipoCombustible_Id: newValue.value });            
+            if (input ==='marca_Id') setSaveParams({ ...saveParams, marca_Id: newValue.value });
+            if (input ==='modelo_Id') setSaveParams({ ...saveParams, modelo_Id: newValue.value });
         };
 
         const close = () => {
-            setAddEmployeeModal(false);
-            setSaveParams(employeeDefault);
+            setAddVehiclesModal(false);
+            setSaveParams(vehiclesDefault);
         }
 
     
 
 
     return (
-        <Transition appear show={addEmployeeModal} as={Fragment}>
+        <Transition appear show={addVehiclesModal} as={Fragment}>
             <Dialog
                 as="div"
-                open={addEmployeeModal}
+                open={addVehiclesModal}
                 onClose={() => {
                     close();
                     //     setRemote(false);
@@ -218,93 +301,110 @@ const selectDefault: {
                                                     onChange={(e) => changeValue(e)}
                                                 />
                                             </div>
-                                            <div className={`mb-5 ${errors.includes('nochasis') ? 'has-error' : ''}`}>
-                                                <label htmlFor="nochasis" className="form-label flex">
-                                                    NoChasis
+                                            <div className={`mb-5 ${errors.includes('NoChasis') ? 'has-error' : ''}`}>
+                                                <label htmlFor="NoChasis" className="form-label flex">
+                                                    No.Chasis
                                                 </label>
                                                 <InputMask
-                                                    id="nochasis"
+                                                    id="NoChasis"
                                                     type="text"
-                                                    placeholder="*****************"
+                                                    placeholder="******************"
                                                     className="form-input"
-                                                    mask="*****************"
+                                                    mask="******************"
                                                     maskChar=""
                                                     alwaysShowMask={false}
-                                                    value={saveParams.nochasis}
+                                                    value={saveParams.NoChasis}
                                                     onChange={(e: any) => changeValue(e)}
                                                 />
                                             </div>
-                                            {/* <div className="mb-5 flex w-full flex-row gap-4">
-                                                <div className={`flex-1 ${errors.includes('tandaLabor') ? 'has-error' : ''}`}>
-                                                    <label htmlFor="tandaLabor" className="form-label flex">
-                                                        Tanda
-                                                    </label>
-                                                    <select id="tandaLabor" className="form-select w-full" value={saveParams.tandaLabor || ''} onChange={changeValue}>
-                                                        <option value="">Seleccione la tanda</option>
-                                                        {listTanda.map((tanda: any, i: number) => (
-                                                            <option key={i} value={tanda}>
-                                                                {tanda}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
 
-                                                <div className={`flex-1 ${errors.includes('porcientoComision') ? 'has-error' : ''}`}>
-                                                    <label htmlFor="porcientoComision" className="form-label flex">
-                                                        Porcentaje de Comisión
-                                                    </label>
-                                                    <input
-                                                        id="porcientoComision"
-                                                        type="number"
-                                                        placeholder="Ingrese el porcentaje"
-                                                        className="form-input w-full"
-                                                        value={saveParams.porcientoComision || ''}
-                                                        onBlur={handleBlur}
-                                                        onChange={(e: any) => changeValue(e)}
-                                                        min="0"
-                                                        max="100.00"
-                                                        step="0.01"
-                                                        onInput={(e: any) => {
-                                                            // Asegurarse de que el valor no sea menor que 0.01 ni mayor que 100
-                                                            if (e.target.value < 0.01) {
-                                                              e.target.value = 0.01;
-                                                            } else if (e.target.value > 100) {
-                                                              e.target.value = 100;
-                                                            }
-                                                        
-                                                            // Limitar a 2 decimales
-                                                            if (e.target.value && e.target.value.includes('.')) {
-                                                              let [integer, decimal] = e.target.value.split('.');
-                                                              if (decimal && decimal.length > 2) {
-                                                                e.target.value = `${integer}.${decimal.substring(0, 2)}`;
-                                                              }
-                                                            }
-                                                          }}
-                                                    />
-                                                </div>
-                                            </div> */}
-
-                                            <div className={`mb-5 ${errors.includes('fechaIngreso') ? 'has-error' : ''}`}>
-                                                <label htmlFor="fechaIngreso">Fecha de Ingreso</label>
-                                                <input
-                                                    id="fechaIngreso"
-                                                    type="date"
-                                                    name="fechaIngreso"
-                                                    className={`form-input w-full rounded border p-2`}
-                                                    value={split(saveParams.fechaIngreso, 'T')[0]}
-                                                    onChange={(e) => changeValue(e)}
+                                            <div className={`mb-5 ${errors.includes('NoMotor') ? 'has-error' : ''}`}>
+                                                <label htmlFor="NoMotor" className="form-label flex">
+                                                    No.Motor
+                                                </label>
+                                                <InputMask
+                                                    id="NoMotor"
+                                                    type="text"
+                                                    placeholder="*****************"
+                                                    className="form-input"
+                                                    mask="**********"
+                                                    maskChar=""
+                                                    alwaysShowMask={false}
+                                                    value={saveParams.NoMotor}
+                                                    onChange={(e: any) => changeValue(e)}
                                                 />
                                             </div>
-                                            <div className="custom-select css-b62m3t-container mb-5">
-                                                    <label htmlFor="selectTicketType" className="flex">
-                                                        Users 
+                                            <div className={`mb-5 ${errors.includes('NoPlaca') ? 'has-error' : ''}`}>
+                                                <label htmlFor="NoPlaca" className="form-label flex">
+                                                    No.Placa
+                                                </label>
+                                                <InputMask
+                                                    id="NoPlaca"
+                                                    type="text"
+                                                    placeholder="*******"
+                                                    className="form-input"
+                                                    mask="*******"
+                                                    maskChar=""
+                                                    alwaysShowMask={false}
+                                                    value={saveParams.NoPlaca}
+                                                    onChange={(e: any) => changeValue(e)}
+                                                />
+                                            </div>
+                                            <div className={`custom-select css-b62m3t-container mb-5 ${errors.includes('tipoVehiculo_Id') ? 'has-error' : ''}`}>
+                                                    <label htmlFor="tipoVehiculo_Id" className="flex form-label">
+                                                        Tipo de Vehiculo  
                                                     </label>
                                                     <AsyncSelect //Category
                                                         cacheOptions
                                                         defaultOptions
-                                                        value={displayedUsers.filter((i: any) => i.value == saveParams.user_Id)[0]}
-                                                        loadOptions={promiseOptionsUser}
-                                                        onChange={(newValue: any) => onChangeValue(newValue)}
+                                                        value={displayedTipoVehiculo.filter((i: any) => i.value == saveParams.tipoVehiculo_Id)[0]}
+                                                        loadOptions={promiseOptionsTipoVehiculo}
+                                                        onChange={(newValue: any) => onChangeValue(newValue, 'tipoVehiculo_Id' )}
+                                                        menuPlacement="auto"
+                                                        maxMenuHeight={120}
+                                                        placeholder="Selecciona un user"
+                                                    />
+                                            </div>
+                                            <div className={`custom-select css-b62m3t-container mb-5 ${errors.includes('tipoCombustible_Id') ? 'has-error' : ''}`}>
+                                                    <label htmlFor="tipoCombustible_Id" className="flex form-label">
+                                                    Tipo de Combustible 
+                                                    </label>
+                                                    <AsyncSelect
+                                                        cacheOptions
+                                                        defaultOptions
+                                                        value={displayedTipoCombustible.filter((i: any) => i.value == saveParams.tipoCombustible_Id)[0]}
+                                                        loadOptions={promiseOptionsTipoCombustible}
+                                                        onChange={(newValue: any) => onChangeValue(newValue, 'tipoCombustible_Id')}
+                                                        menuPlacement="auto"
+                                                        maxMenuHeight={120}
+                                                        placeholder="Selecciona un user"
+                                                    />
+                                            </div>
+                                            <div className={`custom-select css-b62m3t-container mb-5 ${errors.includes('marca_Id') ? 'has-error' : ''}`}>
+                                                    <label htmlFor="marca_Id" className="flex form-label">
+                                                        Marca 
+                                                    </label>
+                                                    <AsyncSelect //Category
+                                                        cacheOptions
+                                                        defaultOptions
+                                                        value={displayedBrand.filter((i: any) => i.value == saveParams.marca_Id)[0]}
+                                                        loadOptions={promiseOptionsBrand}
+                                                        onChange={(newValue: any) => onChangeValue(newValue, 'marca_Id')}
+                                                        menuPlacement="auto"
+                                                        maxMenuHeight={120}
+                                                        placeholder="Selecciona un user"
+                                                    />
+                                            </div>
+                                            <div className={`custom-select css-b62m3t-container mb-5 ${errors.includes('modelo_Id') ? 'has-error' : ''}`}>
+                                                    <label htmlFor="modelo_Id" className="flex form-label">
+                                                        Modelo 
+                                                    </label>
+                                                    <AsyncSelect //Category
+                                                        cacheOptions
+                                                        defaultOptions
+                                                        value={displayedModel.filter((i: any) => i.value == saveParams.modelo_Id)[0]}
+                                                        loadOptions={promiseOptionsModel}
+                                                        onChange={(newValue: any) => onChangeValue(newValue, 'modelo_Id')}
                                                         menuPlacement="auto"
                                                         maxMenuHeight={120}
                                                         placeholder="Selecciona un user"
@@ -331,7 +431,7 @@ const selectDefault: {
                                                 <button
                                                     type="button"
                                                     className={`btn btn-success gap-2 ltr:ml-4 rtl:mr-4 ${loading ? 'cursor-not-allowed opacity-50' : ''}`}
-                                                    onClick={() => saveEmployee()}
+                                                    onClick={() => saveVehicles()}
                                                     disabled={loading}
                                                 >
                                                     {loading ? (

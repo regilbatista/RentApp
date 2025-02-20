@@ -106,10 +106,10 @@ const selectDefault: {
                     // Insert task
                     const resp = await apiPost({ path: 'empleados', data: saveParams });
                     const id = resp?.info?.[0]?.id ?? null; // Added optional chaining and nullish coalescing
-
+                    const msg = resp?.info?.[0]?.msg ?? null;
                 if (id === null) {
                     setLoading(false);
-                    showMessage({msg:'Error saving the Item', type:'error'});
+                    showMessage({msg: msg ? msg : 'Error saving item' , type:'error'});
                 } else {
                     fentchEmployee();
                     showMessage({msg:'The Item has been saved successfully.'});
@@ -267,6 +267,7 @@ const selectDefault: {
                                                         max="100.00"
                                                         step="0.01"
                                                         onInput={(e: any) => {
+                                                            e.target.value = e.target.value.replace(/\D/g, ""); // Elimina caracteres no numéricos
                                                             // Asegurarse de que el valor no sea menor que 0.01 ni mayor que 100
                                                             if (e.target.value < 0.01) {
                                                               e.target.value = 0.01;

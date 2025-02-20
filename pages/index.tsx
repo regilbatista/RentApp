@@ -6,6 +6,8 @@ import Dropdown from '../components/Dropdown';
 import { setPageTitle } from '../store/themeConfigSlice';
 import dynamic from 'next/dynamic';
 import { AuthContext, useAuth } from '@/src/context/authContext';
+import VehiculosMasRentados from '@/components/pages/mostrent/mostrent';
+import VehiculosRentadosVsDisponibles from '@/components/pages/vs/vs';
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
     ssr: false,
 });
@@ -25,7 +27,10 @@ const Index = () => {
     return (
         <>
             <div>
-                <h2>RentCar</h2>
+            <div className="panel">
+             <div className='mb-6'><VehiculosMasRentados/></div>
+                   
+                </div>
             </div>
         </>
     );
